@@ -1,5 +1,5 @@
 {
-  description = "LaTeX package for typesetting linguistic vowel diagrams";
+  description = "LaTeX package for typesetting linguistic vector graphics vowel diagrams";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-24.05";
@@ -10,14 +10,25 @@
     flake-utils.lib.eachDefaultSystem (system:
     let 
       pkgs = nixpkgs.legacyPackages.${system};
+      pname = "vvowel";
     in
     {
       packages.default = pkgs.stdenvNoCC.mkDerivation rec {
-        name = "vvowel";
+        inherit pname;
+        version = "0.1";
+        outputs = [ "tex" ];
         src = self;
+        nativeBuildInputs = [
+          (pkgs.writeShellScript "force-tex-output.sh" ''
+            out="''${tex-}"
+          '')
+        ];
         installPhase = ''
-          mkdir -p $out/tex/latex
-          cp vvowel.sty $out/tex/latex
+          runHook preInstall
+          path="$tex/tex/latex/${pname}"
+          mkdir -p "$path"
+          cp *.{sty,cls,def,clo} "$path"
+          runHook postInstall
         '';
       };
     });
