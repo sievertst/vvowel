@@ -4,7 +4,12 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-25.05";
     flake-parts.url = "github:hercules-ci/flake-parts";
-    nixfmt.url = "github:NixOS/nixfmt";
+
+    treefmt-nix = {
+      url = "github:numtide/treefmt-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
   };
 
   outputs =
@@ -12,6 +17,7 @@
       self,
       nixpkgs,
       flake-parts,
+      treefmt-nix,
       ...
     }@inputs:
     flake-parts.lib.mkFlake { inherit inputs; } {
@@ -22,6 +28,15 @@
         let
           pkgs = nixpkgs.legacyPackages.${system};
           pname = "vvowel";
+
+          treefmt-config = {
+            projectRootFile = "flake.nix";
+            programs.nixfmt.enable = true;
+            programs.texfmt.enable = true;
+            programs.stylua.enable = true;
+          };
+          treefmtEval = treefmt-nix.lib.evalModule pkgs treefmt-config;
+
         in
         {
           packages.default = pkgs.stdenvNoCC.mkDerivation rec {
@@ -43,7 +58,7 @@
             '';
           };
 
-          formatter = pkgs.nixfmt-tree;
+          formatter = treefmtEval.config.build.wrapper;
         };
     };
 }

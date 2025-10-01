@@ -1,7 +1,7 @@
 \NeedsTeXFormat{LaTeX2e}[1994/06/01]
 \ProvidesPackage{vvowel}[2017/05/02 Vector Graphic Vowel Diagram Package]
 
-% ========= required pakckages =========
+% ========= required packages =========
 \RequirePackage{tikz}
 \RequirePackage{xstring}
 \RequirePackage{xkeyval}
@@ -17,124 +17,127 @@
 \newcommand{\@VInFrontOfX}{true}
 \newcommand{\@VInFrontOfY}{true}
 \define@choicekey*{vvowel}{vowel-z}{foreground,background,behindhorizontal,behindvertical}{%
-        \IfStrEqCase{#1}{%
-            {foreground}{}%
-            {background}{\renewcommand{\@VInFrontOfX}{false} \renewcommand{\@VInFrontOfY}{false}}%
-            {behindhorizontal}{\renewcommand{\@VInFrontOfX}{false}}%
-            {behindvertical}{\renewcommand{\@VInFrontOfY}{false}}%
-        }
-    }
+  \IfStrEqCase{#1}{%
+    {foreground}{}%
+    {background}{\renewcommand{\@VInFrontOfX}{false}
+    \renewcommand{\@VInFrontOfY}{false}}%
+    {behindhorizontal}{\renewcommand{\@VInFrontOfX}{false}}%
+    {behindvertical}{\renewcommand{\@VInFrontOfY}{false}}%
+  }
+}
 
 % ========= environments and macros =========
 \newenvironment{voweldiagram}[1][]
 {   % vowel diagram begin instruction
   \setkeys{vvowel}{#1}
 
-    \begin{tikzpicture}
-        \tikzset{%
-            % styles for vowel nodes and dots
-            vowel/.style={fill=white, anchor=mid, text depth=0ex, text height=1ex},
-            dot/.style={circle,fill=black,minimum size=0.4ex,inner sep=0pt,outer sep=-1pt},
+  \begin{tikzpicture}
+    \tikzset{%
+      % styles for vowel nodes and dots
+      vowel/.style={fill=white, anchor=mid, text depth=0ex, text height=1ex},
+      dot/.style={circle,fill=black,minimum size=0.4ex,inner
+      sep=0pt,outer sep=-1pt},
+    }
+
+    \coordinate (hf) at (0,3); % high front
+    \coordinate (hb) at (4,3); % high back
+    \coordinate (lf) at (2,0); % low front
+    \coordinate (lb) at (4,0); % low back
+
+    % --- macro for placing points in barycentric coordinate system ---
+    \newcommand{\coord}[2]{(barycentric
+    cs:hf={(2-##1)*##2},hb={##1*##2},lf={(2-##1)*(3-##2)},lb={##1*(3-##2)})}
+
+    % --- commands ---
+    \newcommand{\@DrawHorizontalGridlines}{
+      \draw \coord{0}{0} -- \coord{2}{0};
+      \draw \coord{0}{1} -- \coord{2}{1};
+      \draw \coord{0}{2} -- \coord{2}{2};
+      \draw \coord{0}{3} -- \coord{2}{3};
+    }
+
+    \newcommand{\@DrawVerticalGridlines}{
+      \draw \coord{0}{0} -- \coord{0}{3};
+      \draw \coord{1}{0} -- \coord{1}{3};
+      \draw \coord{2}{0} -- \coord{2}{3};
+    }
+
+    \newcommand{\placevowel}[4][]{%
+      %place a node containing the text ##2 at the specified coordinates
+      %##3,##4. Shift it to the left or right and/or add a dot with the
+      %optional parameter
+
+      % check optional parameter and shift character to the left or right
+      % or place dots where necessary
+      \IfStrEqCase{##1}{%
+        {dotleft}{\path \coord{##3}{##4} node[vowel, left] {##2} node[dot] {};}%
+        {dotright}{\path \coord{##3}{##4} node[vowel, right] {##2}
+        node[dot] {};}%
+        {left}{\path \coord{##3}{##4} node[vowel, left] {##2};}%
+        {right}{\path \coord{##3}{##4} node[vowel, right] {##2};}%
+        {}{\path \coord{##3}{##4} node[vowel] {##2};}%
       }
+    }
 
-        \coordinate (hf) at (0,3); % high front
-        \coordinate (hb) at (4,3); % high back
-        \coordinate (lf) at (2,0); % low front
-        \coordinate (lb) at (4,0); % low back
+    \newcommand{\autoplacevowel}[2][]{%
+      % place a vowel automatically (through hard-coded coordinates).
+      % Shift it to the left or right and/or add a dot with the optional
+      % parameter
 
-        % --- macro for placing points in barycentric coordinate system ---
-        \newcommand{\coord}[2]{(barycentric cs:hf={(2-##1)*##2},hb={##1*##2},lf={(2-##1)*(3-##2)},lb={##1*(3-##2)})}
+      \IfStrEqCase{##2}{%
+        {i}{\placevowel[##1]{i}{0}{3}}%
+        {y}{\placevowel[##1]{y}{0}{3}}%
+        {ɨ}{\placevowel[##1]{ɨ}{1}{3}}%
+        {ʉ}{\placevowel[##1]{ʉ}{1}{3}}%
+        {ɯ}{\placevowel[##1]{ɯ}{2}{3}}%
+        {u}{\placevowel[##1]{u}{2}{3}}%
+        {ɪ}{\placevowel[##1]{ɪ}{0.4}{2.5}}%
+        {ʏ}{\placevowel[##1]{ʏ}{0.4}{2.5}}%
+        {ɪ̈}{\placevowel[##1]{ɪ̈}{1}{2.5}}%
+        {ʊ̈}{\placevowel[##1]{ʊ̈}{1}{2.5}}%
+        {ɯ̽}{\placevowel[##1]{ɯ̽}{1.6}{2.5}}%
+        {ʊ}{\placevowel[##1]{ʊ}{1.6}{2.5}}%
+        {e}{\placevowel[##1]{e}{0}{2}}%
+        {ø}{\placevowel[##1]{ø}{0}{2}}%
+        {ɘ}{\placevowel[##1]{ɘ}{1}{2}}%
+        {ɵ}{\placevowel[##1]{ɵ}{1}{2}}%
+        {ɤ}{\placevowel[##1]{ɤ}{2}{2}}%
+        {o}{\placevowel[##1]{o}{2}{2}}%
+        {e̞}{\placevowel[##1]{e̞}{0}{1.5}}%
+        {ø̞}{\placevowel[##1]{ø̞}{0}{1.5}}%
+        {ə}{\placevowel[##1]{ə}{1}{1.5}}%
+        {ɵ̞}{\placevowel[##1]{ɵ̞}{1}{1.5}}%
+        {ɤ̞}{\placevowel[##1]{ɤ̞}{2}{1.5}}%
+        {o̞}{\placevowel[##1]{o̞}{2}{1.5}}%
+        {ɛ}{\placevowel[##1]{ɛ}{0}{1}}%
+        {œ}{\placevowel[##1]{œ}{0}{1}}%
+        {ɜ}{\placevowel[##1]{ɜ}{1}{1}}%
+        {ɞ}{\placevowel[##1]{ɞ}{1}{1}}%
+        {ʌ}{\placevowel[##1]{ʌ}{2}{1}}%
+        {ɔ}{\placevowel[##1]{ɔ}{2}{1}}%
+        {æ}{\placevowel[##1]{æ}{0}{0.5}}%
+        {ɐ}{\placevowel[##1]{ɐ}{1}{0.5}}%
+        {ɞ̞}{\placevowel[##1]{ɞ̞}{1}{0.5}}%
+        {a}{\placevowel[##1]{a}{0}{0}}%
+        {ɶ}{\placevowel[##1]{ɶ}{0}{0}}%
+        {ä}{\placevowel[##1]{ä}{1}{0}}%
+        {ɒ̈}{\placevowel[##1]{ɒ̈}{1}{0}}%
+        {ɑ}{\placevowel[##1]{ɑ}{2}{0}}%
+        {ɒ}{\placevowel[##1]{ɒ}{2}{0}}%
+      }
+    }
 
-        % --- commands ---
-        \newcommand{\@DrawHorizontalGridlines}{
-            \draw \coord{0}{0} -- \coord{2}{0};
-            \draw \coord{0}{1} -- \coord{2}{1};
-            \draw \coord{0}{2} -- \coord{2}{2};
-            \draw \coord{0}{3} -- \coord{2}{3};
-        }
-
-        \newcommand{\@DrawVerticalGridlines}{
-            \draw \coord{0}{0} -- \coord{0}{3};
-            \draw \coord{1}{0} -- \coord{1}{3};
-            \draw \coord{2}{0} -- \coord{2}{3};
-        }
-
-        \newcommand{\placevowel}[4][]{%
-            %place a node containing the text ##2 at the specified coordinates
-            %##3,##4. Shift it to the left or right and/or add a dot with the
-            %optional parameter
-
-            % check optional parameter and shift character to the left or right
-            % or place dots where necessary
-            \IfStrEqCase{##1}{%
-                {dotleft}{\path \coord{##3}{##4} node[vowel, left] {##2} node[dot] {};}%
-                {dotright}{\path \coord{##3}{##4} node[vowel, right] {##2} node[dot] {};}%
-                {left}{\path \coord{##3}{##4} node[vowel, left] {##2};}%
-                {right}{\path \coord{##3}{##4} node[vowel, right] {##2};}%
-                {}{\path \coord{##3}{##4} node[vowel] {##2};}%
-            }
-        }
-
-        \newcommand{\autoplacevowel}[2][]{%
-            % place a vowel automatically (through hard-coded coordinates).
-            % Shift it to the left or right and/or add a dot with the optional
-            % parameter
-
-            \IfStrEqCase{##2}{%
-                {i}{\placevowel[##1]{i}{0}{3}}%
-                {y}{\placevowel[##1]{y}{0}{3}}%
-                {ɨ}{\placevowel[##1]{ɨ}{1}{3}}%
-                {ʉ}{\placevowel[##1]{ʉ}{1}{3}}%
-                {ɯ}{\placevowel[##1]{ɯ}{2}{3}}%
-                {u}{\placevowel[##1]{u}{2}{3}}%
-                {ɪ}{\placevowel[##1]{ɪ}{0.4}{2.5}}%
-                {ʏ}{\placevowel[##1]{ʏ}{0.4}{2.5}}%
-                {ɪ̈}{\placevowel[##1]{ɪ̈}{1}{2.5}}%
-                {ʊ̈}{\placevowel[##1]{ʊ̈}{1}{2.5}}%
-                {ɯ̽}{\placevowel[##1]{ɯ̽}{1.6}{2.5}}%
-                {ʊ}{\placevowel[##1]{ʊ}{1.6}{2.5}}%
-                {e}{\placevowel[##1]{e}{0}{2}}%
-                {ø}{\placevowel[##1]{ø}{0}{2}}%
-                {ɘ}{\placevowel[##1]{ɘ}{1}{2}}%
-                {ɵ}{\placevowel[##1]{ɵ}{1}{2}}%
-                {ɤ}{\placevowel[##1]{ɤ}{2}{2}}%
-                {o}{\placevowel[##1]{o}{2}{2}}%
-                {e̞}{\placevowel[##1]{e̞}{0}{1.5}}%
-                {ø̞}{\placevowel[##1]{ø̞}{0}{1.5}}%
-                {ə}{\placevowel[##1]{ə}{1}{1.5}}%
-                {ɵ̞}{\placevowel[##1]{ɵ̞}{1}{1.5}}%
-                {ɤ̞}{\placevowel[##1]{ɤ̞}{2}{1.5}}%
-                {o̞}{\placevowel[##1]{o̞}{2}{1.5}}%
-                {ɛ}{\placevowel[##1]{ɛ}{0}{1}}%
-                {œ}{\placevowel[##1]{œ}{0}{1}}%
-                {ɜ}{\placevowel[##1]{ɜ}{1}{1}}%
-                {ɞ}{\placevowel[##1]{ɞ}{1}{1}}%
-                {ʌ}{\placevowel[##1]{ʌ}{2}{1}}%
-                {ɔ}{\placevowel[##1]{ɔ}{2}{1}}%
-                {æ}{\placevowel[##1]{æ}{0}{0.5}}%
-                {ɐ}{\placevowel[##1]{ɐ}{1}{0.5}}%
-                {ɞ̞}{\placevowel[##1]{ɞ̞}{1}{0.5}}%
-                {a}{\placevowel[##1]{a}{0}{0}}%
-                {ɶ}{\placevowel[##1]{ɶ}{0}{0}}%
-                {ä}{\placevowel[##1]{ä}{1}{0}}%
-                {ɒ̈}{\placevowel[##1]{ɒ̈}{1}{0}}%
-                {ɑ}{\placevowel[##1]{ɑ}{2}{0}}%
-                {ɒ}{\placevowel[##1]{ɒ}{2}{0}}%
-            }
-        }
-
-        % --- do stuff ---
-        % draw grid lines behind vowels
-        \IfStrEq{\@VInFrontOfX}{true}{\@DrawHorizontalGridlines}{}
-        \IfStrEq{\@VInFrontOfY}{true}{\@DrawVerticalGridlines}{}
-}
-{   %endinstructions
+    % --- do stuff ---
+    % draw grid lines behind vowels
+    \IfStrEq{\@VInFrontOfX}{true}{\@DrawHorizontalGridlines}{}
+    \IfStrEq{\@VInFrontOfY}{true}{\@DrawVerticalGridlines}{}
+  }
+  {   % end instructions
 
     % draw remaining grid lines
-        \IfStrEq{\@VInFrontOfX}{false}{\@DrawHorizontalGridlines}{}
-        \IfStrEq{\@VInFrontOfY}{false}{\@DrawVerticalGridlines}{}
-    \end{tikzpicture}
+    \IfStrEq{\@VInFrontOfX}{false}{\@DrawHorizontalGridlines}{}
+    \IfStrEq{\@VInFrontOfY}{false}{\@DrawVerticalGridlines}{}
+  \end{tikzpicture}
 }
 
 \endinput % end of package
-
